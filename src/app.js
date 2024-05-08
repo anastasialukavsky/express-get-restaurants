@@ -1,10 +1,16 @@
 const express = require("express");
 const app = express();
-const Restaurant = require("../models/index")
+// const Restaurant = require("../models/Restaurant")
 const db = require("../db/connection");
+const bodyParser = require('body-parser');
+const restaurantsRouter = require('./routes/routes');
 
-//TODO: Create your GET Request Route Below: 
 
+
+app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+app.use('/restaurants', restaurantsRouter);
 
 
 
