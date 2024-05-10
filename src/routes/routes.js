@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Restaurant = require('../../models/index');
+const { check, validationResult } = require('express-validator');
 
-
-
-router.get('/restaurants', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const rests = await Restaurant.findAll();
     if (rests) res.status(200).json(rests);
@@ -13,7 +12,7 @@ router.get('/restaurants', async (req, res) => {
   }
 });
 
-router.get('/restaurants/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const rest = await Restaurant.findByPk(id);
@@ -23,17 +22,28 @@ router.get('/restaurants/:id', async (req, res) => {
   }
 });
 
-router.post('/restaurants', 
-async (req, res) => {
-  try {
-    const newRestaurant = await Restaurant.create(req.body);
-    res.status(201).json(newRestaurant);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+router.post(
+  '/',
+  [
+    check('name').trim().notEmpty().withMessage('Name cannot be empty'),
+    check('location').notEmpty().trim().withMessage('Location cannot be empty'),
+    check('cuisine').notEmpty().trim().withMessage('Cuisine cannot be empty'),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+      const newRestaurant = await Restaurant.create(req.body);
+      res.status(201).json(newRestaurant);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
   }
-});
+);
 
-router.put('/restaurants/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const updatedRestaurant = await Restaurant.findByPk(id);
@@ -48,7 +58,7 @@ router.put('/restaurants/:id', async (req, res) => {
   }
 });
 
-router.delete('/restaurants/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const deletedRestaurant = await Restaurant.findByPk(id);
